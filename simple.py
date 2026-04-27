@@ -40,7 +40,7 @@ try:
         dynamodb_resource = session.resource('dynamodb')
 
         table_name = os.getenv('DYNAMODB_TABLE', 'onlineStore')
-        table = dynamodb_resource.Table('onlineStore')
+        table = dynamodb_resource.Table(table_name)
 
         credentials = session.get_credentials()
 
