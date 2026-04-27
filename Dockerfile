@@ -15,4 +15,5 @@ COPY API_USAGE.md ./API_USAGE.md
 EXPOSE 5000
 
 ENV FLASK_APP=simple.py
+ENV DYNAMODB_TABLE=onlineStore
 CMD ["flask", "run", "--host=0.0.0.0", "--port=5000"]

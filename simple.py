@@ -38,6 +38,8 @@ app = Flask(__name__)
 try:
         session= boto3.Session()
         dynamodb_resource = session.resource('dynamodb')
+
+        table_name = os.getenv('DYNAMODB_TABLE', 'onlineStore')
         table = dynamodb_resource.Table('onlineStore')
 
         credentials = session.get_credentials()
