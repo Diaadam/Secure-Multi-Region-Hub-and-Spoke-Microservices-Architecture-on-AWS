@@ -1,0 +1,9 @@
+docker login
+
+docker build -t users-api:latest -f .\Users\Dockerfile .\Users
+docker tag users-api:latest diaaadam/users-api:latest
+docker push diaaadam/users-api:latest
+
+docker build -t products-api:latest -f .\Products\Dockerfile .\Products
+docker tag products-api:latest diaaadam/products-api:latest
+docker push diaaadam/products-api:latest

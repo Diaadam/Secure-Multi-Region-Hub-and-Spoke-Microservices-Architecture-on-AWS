@@ -1,0 +1,683 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Users and Products API Tester</title>
+    <style>
+        :root {
+            --bg: #0b1020;
+            --bg-soft: #111830;
+            --panel: rgba(17, 24, 48, 0.86);
+            --panel-border: rgba(148, 163, 184, 0.18);
+            --text: #e5eefb;
+            --muted: #96a7c2;
+            --accent: #62d0ff;
+            --accent-2: #7cf1a0;
+            --danger: #ff7b7b;
+            --code-bg: #08101f;
+            --shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text);
+            font-family: "Avenir Next", "Trebuchet MS", "Verdana", sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(98, 208, 255, 0.18), transparent 28%),
+                radial-gradient(circle at 85% 20%, rgba(124, 241, 160, 0.16), transparent 24%),
+                linear-gradient(160deg, #070b16 0%, #0b1020 48%, #0f172a 100%);
+        }
+
+        .shell {
+            width: min(1400px, calc(100vw - 32px));
+            margin: 0 auto;
+            padding: 28px 0 40px;
+        }
+
+        .hero {
+            display: grid;
+            gap: 18px;
+            grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.9fr);
+            align-items: start;
+            margin-bottom: 22px;
+        }
+
+        .headline,
+        .config,
+        .card,
+        .log {
+            background: var(--panel);
+            border: 1px solid var(--panel-border);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(18px);
+        }
+
+        .headline {
+            border-radius: 24px;
+            padding: 28px;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: rgba(98, 208, 255, 0.12);
+            color: var(--accent);
+            font-size: 12px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(2rem, 4vw, 4.2rem);
+            line-height: 0.98;
+            letter-spacing: -0.05em;
+        }
+
+        .lead {
+            max-width: 68ch;
+            margin: 16px 0 0;
+            color: var(--muted);
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        .config {
+            border-radius: 24px;
+            padding: 22px;
+        }
+
+        .config h2,
+        .section-title {
+            margin: 0 0 14px;
+            font-size: 1.05rem;
+            letter-spacing: 0.02em;
+        }
+
+        .field-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .field {
+            display: grid;
+            gap: 8px;
+        }
+
+        label {
+            font-size: 0.88rem;
+            color: var(--muted);
+        }
+
+        input,
+        textarea,
+        select,
+        button {
+            font: inherit;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 14px;
+            background: rgba(8, 16, 31, 0.9);
+            color: var(--text);
+            padding: 12px 14px;
+            outline: none;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            border-color: rgba(98, 208, 255, 0.55);
+            box-shadow: 0 0 0 3px rgba(98, 208, 255, 0.12);
+        }
+
+        textarea {
+            min-height: 110px;
+            resize: vertical;
+            font-family: "Cascadia Mono", "Consolas", "SFMono-Regular", monospace;
+        }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        button {
+            border: 0;
+            border-radius: 999px;
+            padding: 11px 16px;
+            color: #04121f;
+            background: linear-gradient(135deg, var(--accent), #91f5ff);
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 120ms ease, opacity 120ms ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        button.secondary {
+            color: var(--text);
+            background: rgba(148, 163, 184, 0.12);
+            border: 1px solid rgba(148, 163, 184, 0.16);
+        }
+
+        .layout {
+            display: grid;
+            gap: 18px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .card {
+            border-radius: 22px;
+            padding: 20px;
+            display: grid;
+            gap: 14px;
+        }
+
+        .card header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 12px;
+        }
+
+        .card h3 {
+            margin: 0;
+            font-size: 1.02rem;
+        }
+
+        .method {
+            font-size: 0.8rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--accent-2);
+        }
+
+        .muted {
+            color: var(--muted);
+            font-size: 0.92rem;
+            line-height: 1.6;
+        }
+
+        .inline-grid {
+            display: grid;
+            gap: 12px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .full {
+            grid-column: 1 / -1;
+        }
+
+        .log {
+            margin-top: 18px;
+            border-radius: 22px;
+            padding: 18px;
+        }
+
+        .log pre {
+            margin: 0;
+            padding: 18px;
+            border-radius: 16px;
+            background: var(--code-bg);
+            color: #dbeafe;
+            overflow: auto;
+            min-height: 180px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-family: "Cascadia Mono", "Consolas", "SFMono-Regular", monospace;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 999px;
+            padding: 7px 12px;
+            background: rgba(124, 241, 160, 0.12);
+            color: var(--accent-2);
+            font-size: 0.84rem;
+        }
+
+        .status.error {
+            background: rgba(255, 123, 123, 0.12);
+            color: var(--danger);
+        }
+
+        .route-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .route-actions button {
+            padding: 9px 14px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 1040px) {
+            .hero,
+            .layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="shell">
+        <section class="hero">
+            <div class="headline">
+                <div class="eyebrow">Cognito + API Gateway test page</div>
+                <h1>Call the Users and Products routes from one static page.</h1>
+                <p class="lead">
+                    Use this page as the S3-hosted redirect target after Cognito login. Set the API base URL once,
+                    paste a Cognito bearer token if your gateway authorizer requires it, then call any Users or
+                    Products route directly from the browser.
+                </p>
+            </div>
+
+            <div class="config">
+                <h2>Connection Settings</h2>
+                <div class="field-grid">
+                    <div class="field">
+                        <label for="baseUrl">API base URL</label>
+                        <input id="baseUrl" value="https://d0opz3onm7.execute-api.us-east-2.amazonaws.com/test" />
+                    </div>
+                    <div class="field">
+                        <label for="token">Bearer token</label>
+                        <input id="token" placeholder="Loaded from Cognito redirect or pasted manually" />
+                    </div>
+                </div>
+                <div class="toolbar">
+                    <button class="secondary" type="button" onclick="clearLog()">Clear output</button>
+                    <button class="secondary" type="button" onclick="copyBaseUrl()">Copy base URL</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="layout">
+            <article class="card">
+                <header>
+                    <div>
+                        <div class="method">Users</div>
+                        <h3>Read routes</h3>
+                    </div>
+                </header>
+                <div class="muted">Call the list route, fetch by email, or fetch by id.</div>
+                <div class="route-actions">
+                    <button type="button" onclick="sendRequest('GET', '/Users')">GET /Users</button>
+                    <button type="button" onclick="runUsersByEmail()">GET /Users/&lt;email&gt;</button>
+                    <button type="button" onclick="runUsersById()">GET /getUserById/&lt;id&gt;</button>
+                </div>
+                <div class="inline-grid">
+                    <div class="field">
+                        <label for="userEmail">Email</label>
+                        <input id="userEmail" placeholder="user@example.com" />
+                    </div>
+                    <div class="field">
+                        <label for="userId">Id</label>
+                        <input id="userId" placeholder="USER#1 or 1" />
+                    </div>
+                </div>
+            </article>
+
+            <article class="card">
+                <header>
+                    <div>
+                        <div class="method">Users</div>
+                        <h3>Write routes</h3>
+                    </div>
+                </header>
+                <div class="muted">Create or update a user item using the normalized key structure.</div>
+                <div class="field">
+                    <label for="userPatchBody">PATCH / PUT body</label>
+                    <textarea id="userPatchBody">{
+  "name": "Updated User",
+  "email": "user@example.com"
+}</textarea>
+                </div>
+                <div class="route-actions">
+                    <button type="button" onclick="runUsersCreate()">POST /Users</button>
+                    <button type="button" onclick="runUsersPatch()">PATCH /Users/&lt;id&gt;</button>
+                    <button type="button" onclick="runUsersPut()">PUT /Users/&lt;id&gt;</button>
+                </div>
+                <div class="field">
+                    <label for="userCreateBody">POST /Users body</label>
+                    <textarea id="userCreateBody">{
+  "id": "1",
+  "email": "user@example.com",
+  "name": "Test User"
+}</textarea>
+                </div>
+            </article>
+
+            <article class="card">
+                <header>
+                    <div>
+                        <div class="method">Products</div>
+                        <h3>Read routes</h3>
+                    </div>
+                </header>
+                <div class="muted">Fetch by product id or query products by category and status.</div>
+                <div class="route-actions">
+                    <button type="button" onclick="runProductById()">GET /Products/&lt;id&gt;</button>
+                    <button type="button" onclick="runProductByCategory()">GET /Products/category/&lt;category&gt;</button>
+                </div>
+                <div class="inline-grid">
+                    <div class="field">
+                        <label for="productId">Product id</label>
+                        <input id="productId" placeholder="PROD#1 or 1" />
+                    </div>
+                    <div class="field">
+                        <label for="productSk">Supplier / SK (optional)</label>
+                        <input id="productSk" placeholder="SUPPLIER#acme or acme" />
+                    </div>
+                    <div class="field">
+                        <label for="productCategory">Category</label>
+                        <input id="productCategory" placeholder="electronics" />
+                    </div>
+                    <div class="field">
+                        <label for="productStatus">Status</label>
+                        <input id="productStatus" placeholder="AVAILABLE" value="AVAILABLE" />
+                    </div>
+                </div>
+            </article>
+
+            <article class="card">
+                <header>
+                    <div>
+                        <div class="method">Products</div>
+                        <h3>Write routes</h3>
+                    </div>
+                </header>
+                <div class="muted">Create or update a product item and keep the sort-key format in sync.</div>
+                <div class="field">
+                    <label for="productCreateBody">POST /Products body</label>
+                    <textarea id="productCreateBody">{
+  "id": "101",
+  "supplierName": "acme",
+  "category": "electronics",
+  "price": 299.99,
+  "productName": "Widget Pro",
+  "status": "AVAILABLE"
+}</textarea>
+                </div>
+                <div class="field">
+                    <label for="productPatchBody">PATCH / PUT body</label>
+                    <textarea id="productPatchBody">{
+  "price": 279.99,
+  "status": "AVAILABLE"
+}</textarea>
+                </div>
+                <div class="route-actions">
+                    <button type="button" onclick="runProductCreate()">POST /Products</button>
+                    <button type="button" onclick="runProductPatch()">PATCH /Products/&lt;id&gt;</button>
+                    <button type="button" onclick="runProductPut()">PUT /Products/&lt;id&gt;</button>
+                </div>
+            </article>
+        </section>
+
+        <section class="log">
+            <div class="status" id="status">Ready</div>
+            <pre id="output">Select a route to send a request.</pre>
+        </section>
+    </div>
+
+    <script>
+        const output = document.getElementById('output');
+        const statusNode = document.getElementById('status');
+
+        function normalizeBaseUrl(value) {
+            return String(value || '').trim().replace(/\/$/, '');
+        }
+
+        function getBaseUrl() {
+            const baseUrl = normalizeBaseUrl(document.getElementById('baseUrl').value);
+            if (!baseUrl) {
+                throw new Error('API base URL is required');
+            }
+            return baseUrl;
+        }
+
+        function getToken() {
+            return document.getElementById('token').value.trim();
+        }
+
+        function extractTokenFromRedirect() {
+            const url = new URL(window.location.href);
+            const candidates = new URLSearchParams();
+
+            if (url.hash && url.hash.startsWith('#')) {
+                const hashParams = new URLSearchParams(url.hash.slice(1));
+                hashParams.forEach((value, key) => candidates.set(key, value));
+            }
+
+            url.searchParams.forEach((value, key) => candidates.set(key, value));
+
+            const token = candidates.get('access_token')
+                || candidates.get('id_token')
+                || candidates.get('token')
+                || localStorage.getItem('cognitoBearerToken')
+                || '';
+
+            if (token) {
+                document.getElementById('token').value = token;
+                localStorage.setItem('cognitoBearerToken', token);
+            }
+
+            if (url.hash || url.searchParams.has('access_token') || url.searchParams.has('id_token') || url.searchParams.has('token')) {
+                window.history.replaceState({}, document.title, url.origin + url.pathname);
+            }
+
+            return token;
+        }
+
+        function setStatus(message, isError = false) {
+            statusNode.textContent = message;
+            statusNode.classList.toggle('error', isError);
+        }
+
+        function setOutput(value) {
+            output.textContent = value;
+        }
+
+        function clearLog() {
+            setStatus('Ready');
+            setOutput('Select a route to send a request.');
+        }
+
+        async function copyBaseUrl() {
+            try {
+                await navigator.clipboard.writeText(getBaseUrl());
+                setStatus('Base URL copied');
+            } catch (error) {
+                setStatus(error.message || 'Unable to copy base URL', true);
+            }
+        }
+
+        function buildUrl(path, query = {}) {
+            const baseUrl = getBaseUrl();
+            const url = new URL(baseUrl + path);
+            Object.entries(query).forEach(([key, value]) => {
+                if (value !== undefined && value !== null && String(value).trim() !== '') {
+                    url.searchParams.set(key, value);
+                }
+            });
+            return url.toString();
+        }
+
+        async function sendRequest(method, path, body, query = {}) {
+            try {
+                const url = buildUrl(path, query);
+                const headers = { 'Content-Type': 'application/json' };
+                const token = getToken();
+                if (token) {
+                    headers.Authorization = token.toLowerCase().startsWith('bearer ')
+                        ? token
+                        : `Bearer ${token}`;
+                }
+
+                const response = await fetch(url, {
+                    method,
+                    headers,
+                    body: body === undefined ? undefined : JSON.stringify(body),
+                });
+
+                const text = await response.text();
+                let parsed = text;
+                try {
+                    parsed = text ? JSON.stringify(JSON.parse(text), null, 2) : '';
+                } catch (error) {
+                    parsed = text;
+                }
+
+                setStatus(`${method} ${path} -> ${response.status}`,
+                    response.ok ? false : true);
+                setOutput([`URL: ${url}`, `Status: ${response.status} ${response.statusText}`, '', parsed || '(empty response)'].join('\n'));
+            } catch (error) {
+                setStatus(error.message || 'Request failed', true);
+                setOutput(error.stack || String(error));
+            }
+        }
+
+        function initializeTokenFromRedirect() {
+            const token = extractTokenFromRedirect();
+            if (token) {
+                setStatus('Bearer token loaded from redirect');
+            }
+        }
+
+        function parseJsonField(id) {
+            const raw = document.getElementById(id).value.trim();
+            if (!raw) {
+                return {};
+            }
+            return JSON.parse(raw);
+        }
+
+        function readValue(id) {
+            return document.getElementById(id).value.trim();
+        }
+
+        function runUsersByEmail() {
+            const email = readValue('userEmail');
+            if (!email) return setStatus('Email is required for GET /Users/<email>', true);
+            sendRequest('GET', `/Users/${encodeURIComponent(email)}`);
+        }
+
+        function runUsersById() {
+            const id = readValue('userId');
+            if (!id) return setStatus('Id is required for GET /getUserById/<id>', true);
+            sendRequest('GET', `/getUserById/${encodeURIComponent(id)}`);
+        }
+
+        function runUsersCreate() {
+            try {
+                sendRequest('POST', '/Users', parseJsonField('userCreateBody'));
+            } catch (error) {
+                setStatus(error.message || 'Invalid JSON in user create body', true);
+                setOutput(error.stack || String(error));
+            }
+        }
+
+        function runUsersPatch() {
+            const id = readValue('userId');
+            if (!id) return setStatus('Id is required for PATCH /Users/<id>', true);
+            try {
+                sendRequest('PATCH', `/Users/${encodeURIComponent(id)}`, parseJsonField('userPatchBody'));
+            } catch (error) {
+                setStatus(error.message || 'Invalid JSON in user patch body', true);
+                setOutput(error.stack || String(error));
+            }
+        }
+
+        function runUsersPut() {
+            const id = readValue('userId');
+            if (!id) return setStatus('Id is required for PUT /Users/<id>', true);
+            try {
+                sendRequest('PUT', `/Users/${encodeURIComponent(id)}`, parseJsonField('userPatchBody'));
+            } catch (error) {
+                setStatus(error.message || 'Invalid JSON in user put body', true);
+                setOutput(error.stack || String(error));
+            }
+        }
+
+        function runProductById() {
+            const id = readValue('productId');
+            if (!id) return setStatus('Product id is required for GET /Products/<id>', true);
+
+            const sk = readValue('productSk');
+            const query = sk ? { sk } : {};
+            const encodedId = encodeURIComponent(id);
+            sendRequest('GET', `/Products/${encodedId}`, undefined, query);
+        }
+
+        function runProductByCategory() {
+            const category = readValue('productCategory');
+            if (!category) return setStatus('Category is required for GET /Products/category/<category>', true);
+
+            const status = readValue('productStatus');
+            const encodedCategory = encodeURIComponent(category);
+            const query = status ? { status } : {};
+            sendRequest('GET', `/Products/category/${encodedCategory}`, undefined, query);
+        }
+
+        function runProductCreate() {
+            try {
+                sendRequest('POST', '/Products', parseJsonField('productCreateBody'));
+            } catch (error) {
+                setStatus(error.message || 'Invalid JSON in product create body', true);
+                setOutput(error.stack || String(error));
+            }
+        }
+
+        function runProductPatch() {
+            const id = readValue('productId');
+            if (!id) return setStatus('Product id is required for PATCH /Products/<id>', true);
+
+            const sk = readValue('productSk');
+            const query = sk ? { sk } : {};
+            try {
+                sendRequest('PATCH', `/Products/${encodeURIComponent(id)}`, parseJsonField('productPatchBody'), query);
+            } catch (error) {
+                setStatus(error.message || 'Invalid JSON in product patch body', true);
+                setOutput(error.stack || String(error));
+            }
+        }
+
+        function runProductPut() {
+            const id = readValue('productId');
+            if (!id) return setStatus('Product id is required for PUT /Products/<id>', true);
+
+            const sk = readValue('productSk');
+            const query = sk ? { sk } : {};
+            try {
+                sendRequest('PUT', `/Products/${encodeURIComponent(id)}`, parseJsonField('productPatchBody'), query);
+            } catch (error) {
+                setStatus(error.message || 'Invalid JSON in product put body', true);
+                setOutput(error.stack || String(error));
+            }
+        }
+
+        initializeTokenFromRedirect();
+    </script>
+</body>
+</html>

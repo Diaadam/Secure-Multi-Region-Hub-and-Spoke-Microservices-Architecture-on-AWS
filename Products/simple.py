@@ -9,6 +9,8 @@ try:
     import sys
     from boto3.dynamodb.conditions import Key
     from decimal import Decimal
+    from aws_xray_sdk.core import xray_recorder
+    from aws_xray_sdk.core import patch_all
     from botocore.exceptions import (
             ProfileNotFound,
             NoRegionError,
@@ -38,7 +40,6 @@ app = Flask(__name__)
 try:
         session= boto3.Session()
         dynamodb_resource = session.resource('dynamodb')
-
         table_name = os.getenv('DYNAMODB_TABLE', 'onlineStore')
         table = dynamodb_resource.Table(table_name)
 
@@ -85,7 +86,12 @@ except Exception as e:
     sys.exit(1)
 ####################################################
 
+# Patch all AWS services for X-Ray tracing
+patch_all()
 
+# Configure X-Ray
+xray_recorder.configure(service='Flask-API')
+app.wsgi_app = xray_recorder.middleware(app.wsgi_app)
 
 
 @app.route('/')

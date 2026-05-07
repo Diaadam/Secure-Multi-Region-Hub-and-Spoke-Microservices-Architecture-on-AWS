@@ -1,6 +1,6 @@
 # Flask User API - Detailed Usage Guide
 
-This guide explains how to run and use the API implemented in `simple.py`.
+This guide explains how to run and use the API implemented in `unified.py`.
 
 ## 1) Overview
 
@@ -12,44 +12,40 @@ Current implemented endpoints:
 
 - `GET /`
 - `GET /help`
-- `GET /getAllUsers`
-- `GET /getUserByEmail/<email>`
+- `GET /Users`
+- `GET /Users/<email>`
 - `GET /getUserById/<id>`
-- `POST /createUser`
-- `PATCH /updateUser/<id>`
-- `PUT /updateUser/<id>`
+- `POST /Users`
+- `PATCH /Users/<id>`
+- `PUT /Users/<id>`
 
 ## 2) Run The API
 
 From the project folder:
 
 ```powershell
-python simple.py
+python unified.py
 ```
 
 Flask will start in debug mode and listen on port 5000 by default.
 
+### Optional Cognito Provisioning
+
+If you want `POST /Users` to also create the user in an AWS Cognito user pool, set this environment variable before starting the app:
+
+- `COGNITO_USER_POOL_ID`
+
+The app expects the raw Cognito UserPoolId value.
+
 ## 3) Response Format
 
-All handlers return a common structure:
+All handlers now return a real Flask JSON response with the HTTP status code set on the response itself.
 
-```json
-{
-  "statusCode": 200,
-  "headers": {
-    "Content-Type": "application/json",
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type"
-  },
-  "body": "...JSON string..."
-}
-```
+Important notes:
 
-Important note:
-
-- `body` is a stringified JSON payload, not a raw JSON object.
-- In Postman tests, parse `body` if needed.
+- The body is returned as JSON, not as a Lambda-style `{ statusCode, headers, body }` envelope.
+- CORS headers are added by the application response helper.
+- If you are using Postman or curl, read the response body directly as JSON.
 
 ## 4) Endpoints In Detail
 
@@ -57,7 +53,7 @@ Important note:
 
 - Method: `GET`
 - Path: `/`
-- Purpose: Confirm app is running.
+- Purpose: Confirm the app is running.
 
 Example:
 
@@ -88,49 +84,49 @@ GET http://localhost:5000/help
 Behavior:
 
 - Reads `API_USAGE.md` from the project folder.
-- If the `markdown` package is available, renders full Markdown to HTML.
-- If `markdown` is unavailable, shows safe preformatted text fallback.
-- If `API_USAGE.md` is missing, returns `404` with a short message.
+- If the `markdown` package is available, renders the Markdown to HTML.
+- If `markdown` is unavailable, the page falls back to the app's safe HTML rendering path.
+- If `API_USAGE.md` is missing, the endpoint returns `404` with a short message.
 
 ---
 
 ### 4.3 Get All Users
 
 - Method: `GET`
-- Path: `/getAllUsers`
-- Purpose: Reads all items from DynamoDB table using scan.
+- Path: `/Users`
+- Purpose: Read up to 100 items from the DynamoDB table using `scan`.
 
 Example:
 
 ```http
-GET http://localhost:5000/getAllUsers
+GET http://localhost:5000/Users
 ```
 
-Success response body (`body` field) is typically a JSON array of items.
+Success response is typically a JSON array of items.
 
 ---
 
 ### 4.4 Get User By Email
 
 - Method: `GET`
-- Path: `/getUserByEmail/<email>`
-- Purpose: Fetch a user by email key.
+- Path: `/Users/<email>`
+- Purpose: Fetch a user by email using the GSI.
 
 Example:
 
 ```http
-GET http://localhost:5000/getUserByEmail/EMAIL%23user2@example.com
+GET http://localhost:5000/Users/user2@example.com
 ```
 
 Use URL encoding when needed:
 
 - `#` becomes `%23`
 
-Current code note:
+Implementation note:
 
-- This route currently uses `table.get_item(...)` with `IndexName` and `KeyConditionExpression`.
-- In boto3, that pattern is usually used with `table.query(...)`, not `get_item(...)`.
-- If this route fails, update implementation to query on GSI.
+- This route queries `GSI1` with `KeyConditionExpression=Key('GSI1PK').eq(...)`.
+- The app tries both raw email and `EMAIL#<email>` forms for consistency.
+- `GSI1PK` is the email partition key, and `GSI1SK` is the user PK.
 
 ---
 
@@ -138,7 +134,7 @@ Current code note:
 
 - Method: `GET`
 - Path: `/getUserById/<id>`
-- Purpose: Fetch user by id value in URL.
+- Purpose: Fetch a user by id value in the URL.
 
 Examples:
 
@@ -147,17 +143,18 @@ GET http://localhost:5000/getUserById/USER%232
 GET http://localhost:5000/getUserById/2
 ```
 
-Current code behavior:
+Implementation note:
 
-- This route has the same boto3 method caveat as `getUserByEmail`.
+- This route queries `GSI1` using the value in the URL as `GSI1PK`.
+- Use it when the id value is stored in your GSI.
 
 ---
 
 ### 4.6 Create User
 
 - Method: `POST`
-- Path: `/createUser`
-- Purpose: Create a new user item with generated/normalized key attributes.
+- Path: `/Users`
+- Purpose: Create a new user item with normalized key attributes.
 
 #### Required fields
 
@@ -171,11 +168,12 @@ Current code behavior:
   - else set to `USER#<id>`
 - `SK`:
   - if `SK` exists in request body, use it
-  - else auto-generate with current UTC timestamp (`...Z`)
+  - else auto-generate with the current UTC timestamp (`...Z`)
 - `GSI1PK`:
   - if `GSI1PK` exists in request body, use it
   - else set from email as `EMAIL#<email>` unless email already starts with `EMAIL#`
-- `GSI1SK`: always set to `PK`
+- `GSI1SK`:
+  - always set to `PK`
 
 #### Duplicate protection
 
@@ -188,7 +186,7 @@ This prevents creating the same `PK+SK` item twice.
 #### Postman example
 
 - Method: `POST`
-- URL: `http://localhost:5000/createUser`
+- URL: `http://localhost:5000/Users`
 - Headers: `Content-Type: application/json`
 - Body:
 
@@ -208,7 +206,7 @@ This prevents creating the same `PK+SK` item twice.
 Equivalent curl:
 
 ```bash
-curl -X POST "http://localhost:5000/createUser" \
+curl -X POST "http://localhost:5000/Users" \
   -H "Content-Type: application/json" \
   -d '{"id":"2","email":"user2@example.com","name":"Test User 2","address":{"street":"200 Main St","city":"Metropolis","zip":"10002"}}'
 ```
@@ -216,12 +214,14 @@ curl -X POST "http://localhost:5000/createUser" \
 #### Success response
 
 - `statusCode`: `201`
-- `body`: created item (JSON string)
+- body: created item as JSON
+
+If Cognito provisioning is enabled, the user is created in the user pool first and the DynamoDB write follows. If the Cognito step fails, the request is rejected before the DynamoDB item is stored.
 
 #### Error responses
 
 - `400` if:
-  - body empty or not object
+  - body empty or not an object
   - `id` missing
   - `email` missing
 - `409` if same `PK+SK` already exists
@@ -232,16 +232,16 @@ curl -X POST "http://localhost:5000/createUser" \
 ### 4.7 Update User (Partial Update)
 
 - Methods: `PATCH` or `PUT`
-- Path: `/updateUser/<id>`
+- Path: `/Users/<id>`
 - Purpose: Update only provided attributes while keeping other attributes unchanged.
 
 #### How target user is resolved
 
-- `id` from path is normalized to PK:
-  - If id starts with `USER#`, use as-is
-  - Else convert to `USER#<id>`
-- API queries by `PK` with `Limit=1`, then uses found `SK`.
-- Update is done with key pair `{PK, SK}`.
+- If the path value looks like an email, the app searches by `GSI1PK`.
+- Otherwise the id is normalized to `PK`:
+  - if id starts with `USER#`, use as-is
+  - else convert to `USER#<id>`
+- The app resolves the item first, then updates the item using `{PK, SK}`.
 
 #### Important restrictions
 
@@ -250,7 +250,9 @@ The API rejects updates to key attributes:
 - `PK`
 - `SK`
 
-If any of these fields are included in body, response is `400`.
+If any of these fields are included in the body, the response is `400`.
+
+If the body includes `email` and does not include `GSI1PK`, the app also updates `GSI1PK` so the GSI stays aligned.
 
 #### Request requirements
 
@@ -260,7 +262,7 @@ If any of these fields are included in body, response is `400`.
 #### Postman example
 
 - Method: `PATCH`
-- URL: `http://localhost:5000/updateUser/2`
+- URL: `http://localhost:5000/Users/2`
 - Headers: `Content-Type: application/json`
 - Body:
 
@@ -279,7 +281,7 @@ If any of these fields are included in body, response is `400`.
 Equivalent curl:
 
 ```bash
-curl -X PATCH "http://localhost:5000/updateUser/2" \
+curl -X PATCH "http://localhost:5000/Users/2" \
   -H "Content-Type: application/json" \
   -d '{"name":"Updated User Name","address":{"street":"201 Main St","city":"Cairo","zip":"10002"},"entityType":"User"}'
 ```
@@ -287,33 +289,33 @@ curl -X PATCH "http://localhost:5000/updateUser/2" \
 #### Success response
 
 - `statusCode`: `200`
-- `body`: updated item attributes (JSON string)
+- body: updated item attributes as JSON
 
 #### Error responses
 
 - `400` if:
   - path id missing
-  - body empty or not object
+  - body empty or not an object
   - forbidden key attributes included
-- `404` if user does not exist for resolved PK
+- `404` if user does not exist for the resolved key
 - `500` for unexpected AWS/client exceptions
 
 ## 5) Postman Quick Checklist
 
-Before sending `POST /createUser`:
+Before sending `POST /Users`:
 
 1. Method must be `POST`.
-2. URL must be `/createUser`.
+2. URL must be `/Users`.
 3. Header must include `Content-Type: application/json`.
 4. Body must include at least `id` and `email`.
 
-Before sending `PATCH /updateUser/<id>`:
+Before sending `PATCH /Users/<id>`:
 
-1. Use the correct route (`/updateUser/...`), not `/getUserById/...`.
-2. Method must be `PATCH` (or `PUT`).
+1. Use the correct route (`/Users/...`), not `/getUserById/...`.
+2. Method must be `PATCH` or `PUT`.
 3. Header must include `Content-Type: application/json`.
-4. Send update fields in Body, not URL params.
-5. Keep `PK` and `SK` out of request body.
+4. Send update fields in the body, not URL params.
+5. Keep `PK` and `SK` out of the request body.
 
 ## 6) Common Troubleshooting
 
@@ -325,23 +327,23 @@ Cause:
 
 Fix:
 
-- Use `PATCH /updateUser/<id>`.
+- Use `PATCH /Users/<id>`.
 
 ### ValidationException: provided key element does not match schema
 
 Cause:
 
-- Using wrong key shape for table key schema.
+- Using the wrong key shape for the table key schema.
 
 Fix in current implementation:
 
-- Already handled by deriving `{PK, SK}` before `update_item`.
+- The app derives the correct `{PK, SK}` pair before `update_item`.
 
-### Empty result when email/id includes '#'
+### Empty result when email/id includes `#`
 
 Cause:
 
-- `#` in URL is treated as fragment unless encoded.
+- `#` in a URL is treated as a fragment unless encoded.
 
 Fix:
 
@@ -349,7 +351,7 @@ Fix:
 
 ## 7) Data Model Notes
 
-From your key definitions, table keys are:
+From the key definitions, table keys are:
 
 - Partition key: `PK` (String)
 - Sort key: `SK` (String)
@@ -363,3 +365,10 @@ When designing future routes:
 
 - Use `query` for key-based searches and GSIs.
 - Avoid `scan` for large tables whenever possible.
+
+## 8) ECS / API Gateway Notes
+
+- This app is designed to run as a normal Flask service in ECS behind an ALB.
+- Responses should be returned as Flask JSON responses with real HTTP status codes.
+- X-Ray is enabled through `XRayMiddleware`.
+- For production tracing, make sure ECS has the required X-Ray permissions and network access.
