@@ -17,7 +17,19 @@ The deployment follows a hub-and-spoke VPC design with shared services in the hu
 
 ![Hub-and-spoke architecture](sceenshots/Full-architecture/diagrams/hub-spoke.svg)
 
+**Key layers (from the full-architecture diagrams)**
+
+- **Front door & auth** — API Gateway + Cognito authorizer.
+- **Connectivity** — VPC Link into private ALB target groups.
+- **Compute** — ECS services hosting Users and Products APIs.
+- **Data** — DynamoDB single-table design with replication patterns.
+- **Resilience** — multi-region DR and failover paths.
+- **CI/CD** — build, push, and deploy via CodeBuild/ECR.
+
 Additional architecture diagrams are available in `sceenshots/Full-architecture/diagrams/` (CI/CD, DR, data replication, ALB/ECS, and front-door views).
+
+![Front door](sceenshots/Full-architecture/diagrams/frontdoor.svg)
+![ALB + ECS](sceenshots/Full-architecture/diagrams/alb+ecs.svg)
 
 ## Ingress flow (API request path)
 
