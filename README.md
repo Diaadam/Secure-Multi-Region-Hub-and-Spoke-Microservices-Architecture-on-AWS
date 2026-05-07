@@ -15,7 +15,7 @@ This repository contains a reference implementation and deployment assets for a 
 
 The deployment follows a hub-and-spoke VPC design with shared services in the hub and workload isolation in spokes. API Gateway provides the front door, VPC Link connects to the internal ALB, and ECS services run the microservices in private subnets. The architecture is designed for multi-region resiliency with disaster recovery and data replication patterns.
 
-![Hub-and-spoke architecture](sceenshots/Full-architecture/diagrams/hub-spoke.svg)
+![Hub-and-spoke architecture](sceenshots/Full-architecture/diagrams/full.svg)
 
 **Key layers (from the full-architecture diagrams)**
 
@@ -28,8 +28,6 @@ The deployment follows a hub-and-spoke VPC design with shared services in the hu
 
 Additional architecture diagrams are available in `sceenshots/Full-architecture/diagrams/` (CI/CD, DR, data replication, ALB/ECS, and front-door views).
 
-![Front door](sceenshots/Full-architecture/diagrams/frontdoor.svg)
-![ALB + ECS](sceenshots/Full-architecture/diagrams/alb+ecs.svg)
 
 ## Ingress flow (API request path)
 
