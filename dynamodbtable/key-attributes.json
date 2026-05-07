@@ -1,0 +1,18 @@
+[
+  {
+    "AttributeName": "PK",
+    "AttributeType": "S"
+  },
+  {
+    "AttributeName": "SK",
+    "AttributeType": "S"
+  },
+  {
+    "AttributeName": "GSI1PK",
+    "AttributeType": "S"
+  },
+  {
+    "AttributeName": "GSI1SK",
+    "AttributeType": "S"
+  }
+]

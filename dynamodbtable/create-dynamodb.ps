@@ -1,0 +1,8 @@
+py .\create-dynamodb.py `
+  -p diaa-gbg `
+  -t onlineStore `
+  -pk PK `
+  -sk SK `
+  -r us-east-2 `
+  -attr ((Get-Content .\key-attributes.json -Raw) -replace '"', '\"') `
+  -gsi ((Get-Content .\gsi.json -Raw) -replace '"', '\"')

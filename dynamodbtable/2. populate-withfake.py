@@ -1,0 +1,242 @@
+import boto3
+from decimal import Decimal
+
+# Initialize the DynamoDB resource
+session = boto3.Session(profile_name="diaa-gbg", region_name="us-east-2")
+dynamodb = session.resource('dynamodb')
+
+# Select the table we created earlier
+table = dynamodb.Table('onlineStore')
+
+# 20 Fake records accurately matching our Single-Table Schema
+fake_data = [
+    # ---------------- 5 USERS ----------------
+    {
+        'PK': 'USER#1',
+        'SK': '2023-01-05T00:00:00Z',
+        'GSI1PK': 'EMAIL#user1@example.com',
+        'GSI1SK': 'USER#1',
+        'entityType': 'User',
+        'name': 'Test User 1',
+        'address': {'street': '100 Main St', 'city': 'Metropolis', 'zip': '10001'},
+    },
+    {
+        'PK': 'USER#2',
+        'SK': '2023-03-23T00:00:00Z',
+        'GSI1PK': 'EMAIL#user2@example.com',
+        'GSI1SK': 'USER#2',
+        'entityType': 'User',
+        'name': 'Test User 2',
+        'address': {'street': '200 Main St', 'city': 'Metropolis', 'zip': '10002'},
+    },
+    {
+        'PK': 'USER#3',
+        'SK': '2023-01-25T00:00:00Z',
+        'GSI1PK': 'EMAIL#user3@example.com',
+        'GSI1SK': 'USER#3',
+        'entityType': 'User',
+        'name': 'Test User 3',
+        'address': {'street': '300 Main St', 'city': 'Metropolis', 'zip': '10003'},
+    },
+    {
+        'PK': 'USER#4',
+        'SK': '2023-01-28T00:00:00Z',
+        'GSI1PK': 'EMAIL#user4@example.com',
+        'GSI1SK': 'USER#4',
+        'entityType': 'User',
+        'name': 'Test User 4',
+        'address': {'street': '400 Main St', 'city': 'Metropolis', 'zip': '10004'},
+    },
+    {
+        'PK': 'USER#5',
+        'SK': '2023-02-04T00:00:00Z',
+        'GSI1PK': 'EMAIL#user5@example.com',
+        'GSI1SK': 'USER#5',
+        'entityType': 'User',
+        'name': 'Test User 5',
+        'address': {'street': '500 Main St', 'city': 'Metropolis', 'zip': '10005'},
+    },
+    
+    # ---------------- 10 PRODUCTS ----------------
+    {
+        'PK': 'PROD#1',
+        'SK': '2023-03-17T00:00:00Z',
+        'GSI1PK': 'CATEGORY#Books',
+        'GSI1SK': 'PROD#1',
+        'entityType': 'Product',
+        'productName': 'Books Item 1',
+        'category': 'Books',
+        'description': 'A wonderful books item.',
+        'price': Decimal('98.99'),
+        'supplierName': 'Supplier A',
+    },
+    {
+        'PK': 'PROD#2',
+        'SK': '2023-02-18T00:00:00Z',
+        'GSI1PK': 'CATEGORY#Books',
+        'GSI1SK': 'PROD#2',
+        'entityType': 'Product',
+        'productName': 'Books Item 2',
+        'category': 'Books',
+        'description': 'A wonderful books item.',
+        'price': Decimal('15.99'),
+        'supplierName': 'Supplier A',
+    },
+    {
+        'PK': 'PROD#3',
+        'SK': '2023-01-27T00:00:00Z',
+        'GSI1PK': 'CATEGORY#Electronics',
+        'GSI1SK': 'PROD#3',
+        'entityType': 'Product',
+        'productName': 'Electronics Item 3',
+        'category': 'Electronics',
+        'description': 'A wonderful electronics item.',
+        'price': Decimal('64.99'),
+        'supplierName': 'Supplier B',
+    },
+    {
+        'PK': 'PROD#4',
+        'SK': '2023-02-05T00:00:00Z',
+        'GSI1PK': 'CATEGORY#Books',
+        'GSI1SK': 'PROD#4',
+        'entityType': 'Product',
+        'productName': 'Books Item 4',
+        'category': 'Books',
+        'description': 'A wonderful books item.',
+        'price': Decimal('84.99'),
+        'supplierName': 'Supplier C',
+    },
+    {
+        'PK': 'PROD#5',
+        'SK': '2023-04-03T00:00:00Z',
+        'GSI1PK': 'CATEGORY#Books',
+        'GSI1SK': 'PROD#5',
+        'entityType': 'Product',
+        'productName': 'Books Item 5',
+        'category': 'Books',
+        'description': 'A wonderful books item.',
+        'price': Decimal('31.99'),
+        'supplierName': 'Supplier A',
+    },
+    {
+        'PK': 'PROD#6',
+        'SK': '2023-01-04T00:00:00Z',
+        'GSI1PK': 'CATEGORY#Electronics',
+        'GSI1SK': 'PROD#6',
+        'entityType': 'Product',
+        'productName': 'Electronics Item 6',
+        'category': 'Electronics',
+        'description': 'A wonderful electronics item.',
+        'price': Decimal('74.99'),
+        'supplierName': 'Supplier B',
+    },
+    {
+        'PK': 'PROD#7',
+        'SK': '2023-02-22T00:00:00Z',
+        'GSI1PK': 'CATEGORY#Books',
+        'GSI1SK': 'PROD#7',
+        'entityType': 'Product',
+        'productName': 'Books Item 7',
+        'category': 'Books',
+        'description': 'A wonderful books item.',
+        'price': Decimal('43.99'),
+        'supplierName': 'Supplier B',
+    },
+    {
+        'PK': 'PROD#8',
+        'SK': '2023-02-04T00:00:00Z',
+        'GSI1PK': 'CATEGORY#Clothing',
+        'GSI1SK': 'PROD#8',
+        'entityType': 'Product',
+        'productName': 'Clothing Item 8',
+        'category': 'Clothing',
+        'description': 'A wonderful clothing item.',
+        'price': Decimal('83.99'),
+        'supplierName': 'Supplier C',
+    },
+    {
+        'PK': 'PROD#9',
+        'SK': '2023-02-20T00:00:00Z',
+        'GSI1PK': 'CATEGORY#Electronics',
+        'GSI1SK': 'PROD#9',
+        'entityType': 'Product',
+        'productName': 'Electronics Item 9',
+        'category': 'Electronics',
+        'description': 'A wonderful electronics item.',
+        'price': Decimal('14.99'),
+        'supplierName': 'Supplier A',
+    },
+    {
+        'PK': 'PROD#10',
+        'SK': '2023-02-01T00:00:00Z',
+        'GSI1PK': 'CATEGORY#Electronics',
+        'GSI1SK': 'PROD#10',
+        'entityType': 'Product',
+        'productName': 'Electronics Item 10',
+        'category': 'Electronics',
+        'description': 'A wonderful electronics item.',
+        'price': Decimal('19.99'),
+        'supplierName': 'Supplier C',
+    },
+    
+    # ---------------- 5 ORDERS ----------------
+    {
+        'PK': 'ORDER#1',
+        'SK': '2023-06-30T00:00:00Z',
+        'GSI1PK': 'EMAIL#user5@example.com',
+        'GSI1SK': 'ORDER#1',
+        'entityType': 'Order',
+        'orderStatus': 'Pending',
+        'totalPrice': Decimal('164.99'),
+        'items': ['PROD#9', 'PROD#7'],
+    },
+    {
+        'PK': 'ORDER#2',
+        'SK': '2023-06-30T00:00:00Z',
+        'GSI1PK': 'EMAIL#user1@example.com',
+        'GSI1SK': 'ORDER#2',
+        'entityType': 'Order',
+        'orderStatus': 'Pending',
+        'totalPrice': Decimal('144.99'),
+        'items': ['PROD#9', 'PROD#7'],
+    },
+    {
+        'PK': 'ORDER#3',
+        'SK': '2023-05-12T00:00:00Z',
+        'GSI1PK': 'EMAIL#user3@example.com',
+        'GSI1SK': 'ORDER#3',
+        'entityType': 'Order',
+        'orderStatus': 'Pending',
+        'totalPrice': Decimal('28.99'),
+        'items': ['PROD#1', 'PROD#3'],
+    },
+    {
+        'PK': 'ORDER#4',
+        'SK': '2023-06-19T00:00:00Z',
+        'GSI1PK': 'EMAIL#user4@example.com',
+        'GSI1SK': 'ORDER#4',
+        'entityType': 'Order',
+        'orderStatus': 'Shipped',
+        'totalPrice': Decimal('170.99'),
+        'items': ['PROD#10', 'PROD#2'],
+    },
+    {
+        'PK': 'ORDER#5',
+        'SK': '2023-05-18T00:00:00Z',
+        'GSI1PK': 'EMAIL#user4@example.com',
+        'GSI1SK': 'ORDER#5',
+        'entityType': 'Order',
+        'orderStatus': 'Delivered',
+        'totalPrice': Decimal('78.99'),
+        'items': ['PROD#4', 'PROD#4'],
+    },
+]
+
+# Write all items to the table using a batch_writer
+print("Writing 20 items to DynamoDB in batches...")
+
+with table.batch_writer() as batch:
+    for item in fake_data:
+        batch.put_item(Item=item)
+
+print("Batch write completed successfully!")

@@ -1,0 +1,31 @@
+[
+  {
+    "IndexName": "GSI1",
+    "KeySchema": [
+      {
+        "AttributeName": "GSI1PK",
+        "KeyType": "HASH"
+      },
+      {
+        "AttributeName": "GSI1SK",
+        "KeyType": "RANGE"
+      }
+    ],
+    "Projection": {
+      "ProjectionType": "INCLUDE",
+      "NonKeyAttributes": [
+        "name",
+        "address",
+        "productName",
+        "category",
+        "description",
+        "price",
+        "supplierName",
+        "orderStatus",
+        "totalPrice",
+        "items",
+        "entityType"
+      ]
+    }
+  }
+]

@@ -1,0 +1,69 @@
+[
+    {
+    "AttributeName": "name",
+    "DataType": "String",
+    "Entity": "User",
+    "Description": "The user's full name."
+  },
+  {
+    "AttributeName": "address",
+    "DataType": "Map",
+    "Entity": "User",
+    "Description": "A JSON object containing street, city, zip, etc."
+  },
+  {
+    "AttributeName": "productName",
+    "DataType": "String",
+    "Entity": "Product",
+    "Description": "The name of the product."
+  },
+  {
+    "AttributeName": "category",
+    "DataType": "String",
+    "Entity": "Product",
+    "Description": "E.g., Electronics, Clothing, Books. GSI1PK is based on this attribute."
+  },
+  {
+    "AttributeName": "description",
+    "DataType": "String",
+    "Entity": "Product",
+    "Description": "Text describing the product."
+  },
+  {
+    "AttributeName": "price",
+    "DataType": "Number",
+    "Entity": "Product",
+    "Description": "The cost of the product. GSI1SK is based on this attribute combined with orderStatus."
+  },
+  {
+    "AttributeName": "supplierName",
+    "DataType": "String",
+    "Entity": "Product",
+    "Description": "The name of the product's supplier SK is based on this attribute"
+  },
+  {
+    "AttributeName": "orderStatus",
+    "DataType": "String",
+    "Entity": "Order",
+    "Description": "E.g., Pending, Shipped, Delivered. GSI1SK is based on this attribute combined with price."
+  },
+  {
+    "AttributeName": "totalPrice",
+    "DataType": "Number",
+    "Entity": "Order",
+    "Description": "The total cost of the entire order. "
+  },
+  {
+    "AttributeName": "items",
+    "DataType": "List",
+    "Entity": "Order",
+    "Description": "An array of Product IDs included in the purchase."
+  },
+  {
+    "AttributeName": "entityType",
+    "AttributeType": "S",
+    "DataType": "String",
+    "Entity": "All Entities",
+    "Description": "Identifies the type of record (User, Product, Order)."
+  }
+]
